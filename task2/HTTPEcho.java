@@ -17,18 +17,15 @@ public class HTTPEcho {
             StringBuilder br = new StringBuilder();
 
             while (on) {
-                System.out.println("test 1");
                 clientSentence = inFromClient.readLine();
-                br.append(clientSentence + "\r\n");
+                br.append(clientSentence + "\n");
                 if (clientSentence.equals("")) {
                     on = false;
-                    System.out.println("test 2");
                 }
             }
 
-            System.out.println("test 3");
             clientSentence = br.toString();
-            outToClient.writeBytes(clientSentence + "\r\n");
+            outToClient.writeBytes(clientSentence);
             connectionSocket.close();
         }
     }

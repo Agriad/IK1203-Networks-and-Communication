@@ -37,37 +37,40 @@ public class HTTPAsk {
 
             String firstLine = request[2];
 
-            String[] firstLineSplit = firstLine.split(" ");
-            String[] infoSplit = firstLineSplit[1].split("\\?");
-            String[] typeSplit = infoSplit[1].split("&");
-            String[] Input = new String[3];
+            try {
+                String[] firstLineSplit = firstLine.split(" ");
+                String[] infoSplit = firstLineSplit[1].split("\\?");
+                String[] typeSplit = infoSplit[1].split("&");
+                String[] Input = new String[3];
 
-            //System.out.println(firstLineSplit[1]);
-            //System.out.println(infoSplit[1]);
+                //System.out.println(firstLineSplit[1]);
+                //System.out.println(infoSplit[1]);
 
-            int count = 0;
+                int count = 0;
 
-            for (String string : typeSplit) {
-                String[] input = string.split("=");
-                System.out.println("loop " + input[1]);
-                Input[count] = input[1];
-                count++;
+                for (String string : typeSplit) {
+                    String[] input = string.split("=");
+                    System.out.println("loop " + input[1]);
+                    Input[count] = input[1];
+                    count++;
+                }
+
+                String serverOutput = null;
+
+                if (Input[2] == null) {
+                    serverOutput = TCPClient.askServer(Input[0], Integer.parseInt(Input[1]));
+                }
+                else {
+                    serverOutput = TCPClient.askServer(Input[0], Integer.parseInt(Input[1]), Input[2]);
+                }
+
+                outToClient.writeBytes(serverOutput);
+                connectionSocket.close();
             }
-
-            String serverOutput = null;
-
-            if (Input[2] == null) {
-                serverOutput = TCPClient.askServer(Input[0], Integer.parseInt(Input[1]));
+            catch (ArrayIndexOutOfBoundsException exception) {
+                System.out.println(exception.fillInStackTrace());
+                connectionSocket.close();
             }
-            else {
-                serverOutput = TCPClient.askServer(Input[0], Integer.parseInt(Input[1]), Input[2]);
-            }
-
-            outToClient.writeBytes(serverOutput);
-            connectionSocket.close();
         }
     }
 }
-
-//http://localhost:8888/ask?hostname=whois.iis.se&port=43&string=kth.se
-//http://localhost:8888/ask?hostname=time.nist.gov&port=13

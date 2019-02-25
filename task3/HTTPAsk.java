@@ -47,21 +47,28 @@ public class HTTPAsk {
                 //System.out.println(infoSplit[1]);
 
                 int count = 0;
-
-                for (String string : typeSplit) {
-                    String[] input = string.split("=");
-                    System.out.println("loop " + input[1]);
-                    Input[count] = input[1];
-                    count++;
-                }
-
                 String serverOutput = null;
 
-                if (Input[2] == null) {
-                    serverOutput = TCPClient.askServer(Input[0], Integer.parseInt(Input[1]));
+                if (infoSplit[0].equals("/ask")) {
+                    for (String string : typeSplit) {
+                        String[] input = string.split("=");
+                        //System.out.println("loop " + input[1]);
+                        Input[count] = input[1];
+                        count++;
+                    }
+
+                    serverOutput = "HTTP/1.1 200 OK\r\n\r\n";
+
+                    if (Input[2] == null) {
+                        serverOutput = serverOutput + TCPClient.askServer(Input[0], Integer.parseInt(Input[1]));
+                    }
+                    else {
+                        serverOutput =
+                                serverOutput + TCPClient.askServer(Input[0], Integer.parseInt(Input[1]), Input[2]);
+                    }
                 }
                 else {
-                    serverOutput = TCPClient.askServer(Input[0], Integer.parseInt(Input[1]), Input[2]);
+                    serverOutput = "HTTP/1.1 400 Bad Request\r\n\r\n";
                 }
 
                 outToClient.writeBytes(serverOutput);
@@ -69,6 +76,12 @@ public class HTTPAsk {
             }
             catch (ArrayIndexOutOfBoundsException exception) {
                 System.out.println(exception.fillInStackTrace());
+                connectionSocket.close();
+            }
+            catch (UnknownHostException exception) {
+                System.out.println(exception.fillInStackTrace());
+                outToClient.writeBytes("HTTP/1.1 404 Not Found\r\n\r\n");
+                System.out.println("HTTP/1.1 404 Not Found\r\n\r\n");
                 connectionSocket.close();
             }
         }

@@ -80,9 +80,15 @@ public class HTTPAsk {
                     System.out.println("HTTP/1.1 404 Not Found\r\n\r\n");
                     connectionSocket.close();
                 }
+                catch (NumberFormatException exception) {
+                    System.out.println(exception.fillInStackTrace());
+                    outToClient.writeBytes("HTTP/1.1 400 Bad Request\r\n\r\n");
+                    System.out.println("HTTP/1.1 400 Bad Request\r\n\r\n");
+                    connectionSocket.close();
+                }
             }
             else {
-                serverOutput = "HTTP/1.1 400 Bad Request\r\n\r\n";
+                serverOutput = "HTTP/1.1 404 Not Found\r\n\r\n";
                 outToClient.writeBytes(serverOutput);
                 connectionSocket.close();
             }

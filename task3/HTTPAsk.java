@@ -37,51 +37,53 @@ public class HTTPAsk {
 
             String firstLine = request[2];
 
-            try {
-                String[] firstLineSplit = firstLine.split(" ");
-                String[] infoSplit = firstLineSplit[1].split("\\?");
-                String[] typeSplit = infoSplit[1].split("&");
-                String[] Input = new String[3];
+            String[] firstLineSplit = firstLine.split(" ");
+            String check = firstLineSplit[1];
+            String isItAsk = "";
+            String serverOutput = null;
 
-                //System.out.println(firstLineSplit[1]);
-                //System.out.println(infoSplit[1]);
+            if (!check.isEmpty() && check.length() >= 4) {
+                isItAsk = check.substring(1, 4);
+            }
 
-                int count = 0;
-                String serverOutput = null;
+            if (isItAsk.equals("ask")) {
+                try {
+                    String[] infoSplit = firstLineSplit[1].split("\\?");
+                    String[] typeSplit = infoSplit[1].split("&");
+                    String[] Input = new String[3];
+                    int count = 0;
 
-                if (infoSplit[0].equals("/ask")) {
                     for (String string : typeSplit) {
                         String[] input = string.split("=");
-                        //System.out.println("loop " + input[1]);
                         Input[count] = input[1];
                         count++;
                     }
 
-                    serverOutput = "HTTP/1.1 200 OK\r\n\r\n";
+                    //serverOutput = "HTTP/1.1 200 OK\r\n\r\n";
 
                     if (Input[2] == null) {
-                        serverOutput = serverOutput + TCPClient.askServer(Input[0], Integer.parseInt(Input[1]));
+                        //serverOutput = serverOutput + TCPClient.askServer(Input[0], Integer.parseInt(Input[1]));
+                        serverOutput = TCPClient.askServer(Input[0], Integer.parseInt(Input[1]));
                     }
                     else {
-                        serverOutput =
-                                serverOutput + TCPClient.askServer(Input[0], Integer.parseInt(Input[1]), Input[2]);
+                        //serverOutput =
+                        //        serverOutput + TCPClient.askServer(Input[0], Integer.parseInt(Input[1]), Input[2]);
+                        serverOutput = TCPClient.askServer(Input[0], Integer.parseInt(Input[1]), Input[2]);
                     }
-                }
-                else {
-                    serverOutput = "HTTP/1.1 400 Bad Request\r\n\r\n";
-                }
 
+                    outToClient.writeBytes("HTTP/1.1 200 OK\r\n\r\n" + serverOutput);
+                    connectionSocket.close();
+                }
+                catch (UnknownHostException exception) {
+                    System.out.println(exception.fillInStackTrace());
+                    outToClient.writeBytes("HTTP/1.1 404 Not Found\r\n\r\n");
+                    System.out.println("HTTP/1.1 404 Not Found\r\n\r\n");
+                    connectionSocket.close();
+                }
+            }
+            else {
+                serverOutput = "HTTP/1.1 400 Bad Request\r\n\r\n";
                 outToClient.writeBytes(serverOutput);
-                connectionSocket.close();
-            }
-            catch (ArrayIndexOutOfBoundsException exception) {
-                System.out.println(exception.fillInStackTrace());
-                connectionSocket.close();
-            }
-            catch (UnknownHostException exception) {
-                System.out.println(exception.fillInStackTrace());
-                outToClient.writeBytes("HTTP/1.1 404 Not Found\r\n\r\n");
-                System.out.println("HTTP/1.1 404 Not Found\r\n\r\n");
                 connectionSocket.close();
             }
         }
